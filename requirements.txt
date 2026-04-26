@@ -1,0 +1,6 @@
+# PyroWall Requirements
+# Core
+pytest>=7.0
+
+# Optional — only needed for live packet capture
+# scapy>=2.5

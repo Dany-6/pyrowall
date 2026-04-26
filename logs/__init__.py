@@ -1,0 +1,1 @@
+# PyroWall logs package

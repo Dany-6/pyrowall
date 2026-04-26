@@ -1,0 +1,34 @@
+{"ts": 1777216103.895, "action": "DENY", "proto": "TCP", "src": "8.8.8.8:53", "dst": "192.168.1.10:1024", "flags": "SYN", "size": 64, "rule": "default"}
+{"ts": 1777216165.189, "action": "DENY", "proto": "TCP", "src": "8.8.8.8:53", "dst": "192.168.1.10:1024", "flags": "SYN", "size": 64, "rule": "default"}
+{"ts": 1777216165.19, "action": "ALLOW", "proto": "TCP", "src": "192.168.1.10:1025", "dst": "1.1.1.1:443", "flags": "SYN", "size": 64, "rule": "default"}
+{"ts": 1777216165.19, "action": "DENY", "proto": "TCP", "src": "203.0.113.5:6543", "dst": "192.168.1.10:22", "flags": "SYN", "size": 64, "rule": "default"}
+{"ts": 1777216165.19, "action": "ALLOW", "proto": "UDP", "src": "192.168.1.10:5353", "dst": "8.8.8.8:53", "flags": "", "size": 64, "rule": "default"}
+{"ts": 1777216165.193, "action": "LOG", "proto": "ICMP", "src": "10.0.0.1:0", "dst": "192.168.1.10:0", "flags": "", "size": 64, "rule": "default"}
+{"ts": 1777216165.193, "action": "ALLOW", "proto": "TCP", "src": "192.168.1.20:4321", "dst": "192.168.1.10:80", "flags": "SYN", "size": 64, "rule": "default"}
+{"ts": 1777216165.194, "action": "DENY", "proto": "TCP", "src": "185.100.87.3:9999", "dst": "192.168.1.10:23", "flags": "SYN", "size": 64, "rule": "default"}
+{"ts": 1777216165.194, "action": "DENY", "proto": "TCP", "src": "192.168.1.30:3333", "dst": "192.168.1.10:445", "flags": "SYN", "size": 64, "rule": "default"}
+{"ts": 1777216165.194, "action": "ALLOW", "proto": "TCP", "src": "10.0.0.5:4444", "dst": "192.168.1.10:22", "flags": "SYN", "size": 64, "rule": "default"}
+{"ts": 1777216165.194, "action": "DENY", "proto": "UDP", "src": "192.168.1.10:1234", "dst": "8.8.8.8:443", "flags": "", "size": 64, "rule": "default"}
+{"ts": 1777216308.884, "action": "DENY", "proto": "TCP", "src": "8.8.8.8:53", "dst": "192.168.1.10:1024", "flags": "SYN", "size": 64, "rule": "default"}
+{"ts": 1777216308.884, "action": "ALLOW", "proto": "TCP", "src": "192.168.1.10:1025", "dst": "1.1.1.1:443", "flags": "SYN", "size": 64, "rule": "default"}
+{"ts": 1777216308.884, "action": "DENY", "proto": "TCP", "src": "203.0.113.5:6543", "dst": "192.168.1.10:22", "flags": "SYN", "size": 64, "rule": "default"}
+{"ts": 1777216308.885, "action": "ALLOW", "proto": "UDP", "src": "192.168.1.10:5353", "dst": "8.8.8.8:53", "flags": "", "size": 64, "rule": "default"}
+{"ts": 1777216308.885, "action": "LOG", "proto": "ICMP", "src": "10.0.0.1:0", "dst": "192.168.1.10:0", "flags": "", "size": 64, "rule": "default"}
+{"ts": 1777216308.885, "action": "ALLOW", "proto": "TCP", "src": "192.168.1.20:4321", "dst": "192.168.1.10:80", "flags": "SYN", "size": 64, "rule": "default"}
+{"ts": 1777216308.885, "action": "DENY", "proto": "TCP", "src": "185.100.87.3:9999", "dst": "192.168.1.10:23", "flags": "SYN", "size": 64, "rule": "default"}
+{"ts": 1777216308.885, "action": "DENY", "proto": "TCP", "src": "192.168.1.30:3333", "dst": "192.168.1.10:445", "flags": "SYN", "size": 64, "rule": "default"}
+{"ts": 1777216308.886, "action": "ALLOW", "proto": "TCP", "src": "10.0.0.5:4444", "dst": "192.168.1.10:22", "flags": "SYN", "size": 64, "rule": "default"}
+{"ts": 1777216308.886, "action": "DENY", "proto": "UDP", "src": "192.168.1.10:1234", "dst": "8.8.8.8:443", "flags": "", "size": 64, "rule": "default"}
+{"ts": 1777216804.852, "action": "ALLOW", "proto": "TCP", "src": "8.8.8.8:53", "dst": "192.168.1.10:1024", "flags": "SYN", "size": 64, "rule": "ALLOW TCP  0.0.0.0/0:ANY -> 0.0.0.0/0:1024-65535  # ephemeral ports"}
+{"ts": 1777216804.853, "action": "ALLOW", "proto": "TCP", "src": "192.168.1.10:1025", "dst": "1.1.1.1:443", "flags": "SYN", "size": 64, "rule": "ALLOW TCP  0.0.0.0/0:ANY -> 0.0.0.0/0:443  # HTTPS"}
+{"ts": 1777216804.853, "action": "DENY", "proto": "TCP", "src": "203.0.113.5:6543", "dst": "192.168.1.10:22", "flags": "SYN", "size": 64, "rule": "DENY  TCP  0.0.0.0/0:ANY -> 0.0.0.0/0:22  # block public SSH"}
+{"ts": 1777216804.853, "action": "ALLOW", "proto": "UDP", "src": "192.168.1.10:5353", "dst": "8.8.8.8:53", "flags": "", "size": 64, "rule": "ALLOW UDP  0.0.0.0/0:ANY -> 0.0.0.0/0:53  # outbound DNS queries"}
+{"ts": 1777216804.854, "action": "LOG", "proto": "ICMP", "src": "10.0.0.1:0", "dst": "192.168.1.10:0", "flags": "", "size": 64, "rule": "LOG   ICMP 0.0.0.0/0:ANY -> 0.0.0.0/0:ANY  # log all ICMP"}
+{"ts": 1777216804.854, "action": "ALLOW", "proto": "TCP", "src": "192.168.1.20:4321", "dst": "192.168.1.10:80", "flags": "SYN", "size": 64, "rule": "ALLOW TCP  0.0.0.0/0:ANY -> 0.0.0.0/0:80  # HTTP"}
+{"ts": 1777216804.854, "action": "DENY", "proto": "TCP", "src": "185.100.87.3:9999", "dst": "192.168.1.10:23", "flags": "SYN", "size": 64, "rule": "DENY  TCP  0.0.0.0/0:ANY -> 0.0.0.0/0:23  # block Telnet"}
+{"ts": 1777216804.854, "action": "DENY", "proto": "TCP", "src": "192.168.1.30:3333", "dst": "192.168.1.10:445", "flags": "SYN", "size": 64, "rule": "DENY  TCP  0.0.0.0/0:ANY -> 0.0.0.0/0:445  # SMB"}
+{"ts": 1777216804.854, "action": "ALLOW", "proto": "TCP", "src": "10.0.0.5:4444", "dst": "192.168.1.10:22", "flags": "SYN", "size": 64, "rule": "ALLOW TCP  10.0.0.0/8:ANY -> 0.0.0.0/0:22  # SSH from 10.x"}
+{"ts": 1777216804.854, "action": "DENY", "proto": "UDP", "src": "192.168.1.10:1234", "dst": "8.8.8.8:443", "flags": "", "size": 64, "rule": "DENY  ANY  0.0.0.0/0:ANY -> 0.0.0.0/0:ANY  # default deny"}
+{"ts": 1777216804.854, "action": "ALLOW", "proto": "TCP", "src": "192.168.1.10:2000", "dst": "93.184.216.34:80", "flags": "SYN", "size": 64, "rule": "ALLOW TCP  0.0.0.0/0:ANY -> 0.0.0.0/0:80  # HTTP"}
+{"ts": 1777216804.855, "action": "ALLOW", "proto": "TCP", "src": "192.168.1.10:2000", "dst": "93.184.216.34:80", "flags": "ACK", "size": 64, "rule": "ALLOW TCP  0.0.0.0/0:ANY -> 0.0.0.0/0:80  # HTTP"}
+{"ts": 1777216804.855, "action": "ALLOW", "proto": "TCP", "src": "192.168.1.10:2000", "dst": "93.184.216.34:80", "flags": "ACK", "size": 512, "rule": "default_policy"}
