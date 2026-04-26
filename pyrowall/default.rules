@@ -1,0 +1,52 @@
+# PyroWall Default Rules
+# Format: ACTION PROTO SRC_IP SRC_PORT -> DST_IP DST_PORT  # comment
+#
+# Actions : ALLOW | DENY | LOG
+# Protocol: TCP | UDP | ICMP | ANY
+# IP      : x.x.x.x, x.x.x.x/CIDR, or ANY
+# Port    : integer or ANY
+#
+# Rules are evaluated top-to-bottom. First match wins.
+# ---------------------------------------------------------------
+
+# --- Allow loopback ---
+ALLOW ANY 127.0.0.0/8 ANY -> 127.0.0.0/8 ANY             # loopback traffic
+
+# --- Allow established-like UDP for DNS ---
+ALLOW UDP 0.0.0.0/0 ANY -> 0.0.0.0/0 53                  # outbound DNS queries
+ALLOW UDP 0.0.0.0/0 53  -> 0.0.0.0/0 ANY                 # DNS replies
+
+# --- Web traffic ---
+ALLOW TCP 0.0.0.0/0 ANY -> 0.0.0.0/0 80                  # HTTP
+ALLOW TCP 0.0.0.0/0 ANY -> 0.0.0.0/0 443                 # HTTPS
+ALLOW TCP 0.0.0.0/0 80  -> 0.0.0.0/0 ANY                 # HTTP replies
+ALLOW TCP 0.0.0.0/0 443 -> 0.0.0.0/0 ANY                 # HTTPS replies
+
+# --- SSH: allow from private networks only ---
+ALLOW TCP 10.0.0.0/8     ANY -> 0.0.0.0/0 22             # SSH from 10.x
+ALLOW TCP 172.16.0.0/12  ANY -> 0.0.0.0/0 22             # SSH from 172.16-31.x
+ALLOW TCP 192.168.0.0/16 ANY -> 0.0.0.0/0 22             # SSH from 192.168.x
+DENY  TCP 0.0.0.0/0      ANY -> 0.0.0.0/0 22             # block public SSH
+
+# --- FTP ---
+DENY TCP 0.0.0.0/0 ANY -> 0.0.0.0/0 21                   # block FTP (insecure)
+
+# --- Telnet ---
+DENY TCP 0.0.0.0/0 ANY -> 0.0.0.0/0 23                   # block Telnet
+
+# --- SMTP (outbound email) ---
+ALLOW TCP 0.0.0.0/0 ANY -> 0.0.0.0/0 587                 # SMTP submission
+DENY  TCP 0.0.0.0/0 ANY -> 0.0.0.0/0 25                  # block direct SMTP relay
+
+# --- ICMP: allow ping but log it ---
+LOG  ICMP 0.0.0.0/0 ANY -> 0.0.0.0/0 ANY                 # log all ICMP
+
+# --- Block known bad ports ---
+DENY TCP 0.0.0.0/0 ANY -> 0.0.0.0/0 135                  # RPC / MSRPC
+DENY TCP 0.0.0.0/0 ANY -> 0.0.0.0/0 139                  # NetBIOS
+DENY TCP 0.0.0.0/0 ANY -> 0.0.0.0/0 445                  # SMB
+DENY UDP 0.0.0.0/0 ANY -> 0.0.0.0/0 137                  # NetBIOS name
+DENY UDP 0.0.0.0/0 ANY -> 0.0.0.0/0 138                  # NetBIOS datagram
+
+# --- Default deny all ---
+DENY ANY 0.0.0.0/0 ANY -> 0.0.0.0/0 ANY                  # default deny
