@@ -6,14 +6,17 @@ A fully functional stateful packet-filtering firewall built in pure Python, writ
 
 ## Features
 
-- **Stateful inspection** — tracks TCP connections (SYN → ESTABLISHED → FIN), UDP, and ICMP sessions
+- **Stateful inspection** — tracks TCP connections (SYN -> ESTABLISHED -> FIN), UDP, and ICMP sessions
 - **Rule engine** — human-readable `.rules` file format with ALLOW / DENY / LOG actions
-- **CIDR matching** — match source/destination IPs against network ranges (e.g. `192.168.0.0/16`)
+- **Advanced rules** — supports port ranges (e.g. `1024-65535`) and time-based schedules (e.g. `schedule:22:00-06:00`)
+- **CIDR matching** — match source/destination IPs against network ranges (e.g. `192.168.0.0/16` and IPv6 `::/0`)
+- **Rate limiting** — sliding-window anti-flood protection per source IP
+- **Hot-reloading** — auto-reloads rules without restarting the firewall
 - **Live capture** — intercept real traffic via `scapy` or raw sockets (root required)
 - **Simulation mode** — test rules against synthetic packets without any network access
 - **Event hooks** — register Python callbacks on firewall events (`deny`, `allow`, `log`)
-- **Structured logging** — JSON-line log file for easy parsing and analysis
-- **Full test suite** — 20+ pytest unit and integration tests
+- **Structured logging** — JSON-line log file with matched rule attribution for easy parsing
+- **Full test suite** — 70+ pytest unit and integration tests
 
 ---
 
@@ -24,7 +27,8 @@ pyrowall/
 ├── core/
 │   ├── firewall.py        # Main Firewall class — orchestrates everything
 │   ├── packet.py          # Packet dataclass + factory methods
-│   ├── state_table.py     # Stateful connection tracking
+│   ├── rate_limiter.py    # Sliding-window rate limiter
+│   ├── state_table.py     # Stateful connection tracking + top talkers
 │   └── capture.py         # Live packet capture (scapy / raw socket)
 ├── rules/
 │   ├── rule_engine.py     # Rule parser, matcher, evaluator
@@ -44,7 +48,7 @@ pyrowall/
 ### 1. Clone & install
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/pyrowall.git
+git clone https://github.com/Dany-6/pyrowall.git
 cd pyrowall
 pip install pytest          # required for tests
 pip install scapy           # optional — only for live capture
@@ -58,14 +62,14 @@ python main.py --simulate
 
 Output:
 ```
-=================================================================
-  PyroWall — Simulation Mode
-=================================================================
-  #    ACTION  PACKET
------------------------------------------------------------------
-  1    ✓ ALLOW  TCP 8.8.8.8:53 → 192.168.1.10:1024 [SYN] 64B
-  2    ✓ ALLOW  TCP 192.168.1.10:1025 → 1.1.1.1:443 [SYN] 64B
-  3    ✗ DENY   TCP 203.0.113.5:6543 → 192.168.1.10:22 [SYN] 64B
+===========================================================================
+  PyroWall -- Simulation Mode
+===========================================================================
+  #    ACTION  RULE                           PACKET
+---------------------------------------------------------------------------
+  1    [+] ALLOW  ephemeral ports                TCP 8.8.8.8:53 -> 192.168.1.10:1024 [SYN] 64B
+  2    [+] ALLOW  HTTPS                          TCP 192.168.1.10:1025 -> 1.1.1.1:443 [SYN] 64B
+  3    [X] DENY   block public SSH               TCP 203.0.113.5:6543 -> 192.168.1.10:22 [SYN] 64B
   ...
 ```
 
@@ -100,19 +104,22 @@ python main.py --simulate --rules rules/default.rules
 ## Rules File Format
 
 ```
-# ACTION  PROTO  SRC_IP      SRC_PORT  ->  DST_IP      DST_PORT  # comment
-ALLOW     TCP    0.0.0.0/0   ANY       ->  0.0.0.0/0   443       # HTTPS
-DENY      TCP    0.0.0.0/0   ANY       ->  0.0.0.0/0   23        # Telnet
-LOG       ICMP   0.0.0.0/0   ANY       ->  0.0.0.0/0   ANY       # ping
-DENY      ANY    0.0.0.0/0   ANY       ->  0.0.0.0/0   ANY       # default deny
+# ACTION  PROTO  SRC_IP      SRC_PORT  ->  DST_IP      DST_PORT  [schedule:HH:MM-HH:MM] # comment
+ALLOW     TCP    0.0.0.0/0   ANY       ->  0.0.0.0/0   443                              # HTTPS
+DENY      TCP    0.0.0.0/0   ANY       ->  0.0.0.0/0   23                               # Telnet
+LOG       ICMP   0.0.0.0/0   ANY       ->  0.0.0.0/0   ANY                              # ping
+ALLOW     TCP    0.0.0.0/0   ANY       ->  0.0.0.0/0   1024-65535                       # port ranges
+DENY      TCP    0.0.0.0/0   ANY       ->  0.0.0.0/0   80        schedule:22:00-06:00   # time-based
+DENY      ANY    0.0.0.0/0   ANY       ->  0.0.0.0/0   ANY                              # default deny
 ```
 
 | Field    | Values                              |
 |----------|-------------------------------------|
 | ACTION   | `ALLOW`, `DENY`, `LOG`              |
 | PROTO    | `TCP`, `UDP`, `ICMP`, `ANY`         |
-| IP       | `x.x.x.x`, `x.x.x.x/CIDR`, `ANY`  |
-| PORT     | integer (e.g. `443`) or `ANY`       |
+| IP       | `x.x.x.x`, `x.x.x.x/CIDR`, `::/0`, `ANY` |
+| PORT     | integer (e.g. `443`), range (e.g. `1024-65535`), or `ANY` |
+| SCHEDULE | optional, `schedule:HH:MM-HH:MM`    |
 
 Rules are evaluated **top-to-bottom**. First match wins.
 
@@ -131,7 +138,7 @@ fw.start()
 
 # Process a synthetic packet
 packet = Packet.tcp("1.2.3.4", "5.6.7.8", 12345, 443, flags="SYN")
-action = fw.process(packet)
+action, rule = fw.process(packet)
 print(action)  # Action.ALLOW
 
 # Register a hook on denied packets
@@ -173,6 +180,8 @@ Incoming Packet
 | `--list-rules` | Print all loaded rules and exit |
 | `--policy allow\|deny` | Default policy when no rule matches |
 | `--log-file FILE` | Output log file path |
+| `--rate-limit N` | Max packets/sec per source IP (0=disabled) |
+| `--watch` | Watch rules file for changes and auto-reload |
 | `--verbose` | Enable debug logging |
 
 ---
